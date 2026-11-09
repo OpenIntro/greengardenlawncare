@@ -360,7 +360,7 @@ export function convertTemplate(template, { uriToSrc = new Map() } = {}) {
   html = transformFlow(html);
   html = html.replaceAll(
     "<span>{{ phoneLabel }}</span>",
-    '<span data-phone-label data-phone="{{ site.phone }}">{{ phoneLabel }}</span>',
+    '<span data-phone-label data-phone="{{ site.phone }}">Call<span class="when-desktop"> {{ site.phone }}</span></span>',
   );
   if (html.includes("onClick=") || html.includes("style-hover") || html.includes("style-focus")) {
     throw new Error("Template still contains a design-tool handler or pseudo style");

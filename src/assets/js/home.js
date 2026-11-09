@@ -24,6 +24,8 @@ const formPanel = document.querySelector('[data-panel="form"]');
 const successPanel = document.querySelector('[data-panel="success"]');
 const form = document.querySelector("[data-estimate-form]");
 let lastFocus = null;
+let headerTone = "";
+let resizeFrame = 0;
 
 function mobile() {
   return !desktop.matches;
@@ -32,7 +34,10 @@ function mobile() {
 function applyHeader() {
   if (!header) return;
   const menuOpen = menu && !menu.hasAttribute("hidden");
-  const tone = window.scrollY <= 24 && !menuOpen ? headerTones.dark : headerTones.light;
+  const nextTone = window.scrollY <= 24 && !menuOpen ? "dark" : "light";
+  if (nextTone === headerTone) return;
+  headerTone = nextTone;
+  const tone = headerTones[nextTone];
   header.style.background = tone.bg;
   header.style.borderBottomColor = tone.border;
   document.querySelectorAll("[data-header-ink]").forEach((element) => {
@@ -292,8 +297,12 @@ document.addEventListener("keydown", (event) => {
 
 window.addEventListener("scroll", applyHeader, { passive: true });
 window.addEventListener("resize", () => {
-  applyChrome();
-  layoutGallery();
+  if (resizeFrame) return;
+  resizeFrame = requestAnimationFrame(() => {
+    resizeFrame = 0;
+    applyChrome();
+    layoutGallery();
+  });
 }, { passive: true });
 desktop.addEventListener("change", () => {
   applyChrome();

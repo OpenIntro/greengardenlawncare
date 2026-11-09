@@ -6,7 +6,7 @@
     "extract": "node tools/extract.js",
     "build": "node tools/extract.js && eleventy",
     "serve": "node tools/extract.js && eleventy --serve --port=8080",
-    "test": "node --test --test-concurrency=1 ./test/extract.test.js ./test/convert.test.js ./test/data.test.js ./test/urls.test.js ./test/schema.test.js ./test/image-size.test.js ./test/deploy-policy.test.js ./test/estimate.test.js",
+    "test": "node --test --test-concurrency=1 ./test/extract.test.js ./test/convert.test.js ./test/data.test.js ./test/urls.test.js ./test/schema.test.js ./test/image-size.test.js ./test/deploy-policy.test.js ./test/estimate.test.js ./test/responsive-markup.test.js",
     "test:e2e": "playwright test",
     "audit": "node tools/audit.js",
     "verify": "npm run build && npm test && npm run audit && npm run test:e2e",

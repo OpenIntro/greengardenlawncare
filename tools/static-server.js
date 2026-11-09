@@ -1,6 +1,7 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
+import zlib from "node:zlib";
 
 const [dirArg, portArg, mode] = process.argv.slice(2);
 const root = path.resolve(dirArg || ".");
@@ -45,29 +46,49 @@ const server = http.createServer((req, res) => {
   }
   fs.readFile(file, (error, data) => {
     if (error) {
-      sendMissing(res);
+      sendMissing(res, req);
       return;
     }
     const type = types[path.extname(file)] || "application/octet-stream";
-    res.writeHead(200, { "Content-Type": type, "Cache-Control": "no-store" });
-    res.end(data);
+    send(req, res, 200, type, data);
   });
 });
 
-function sendMissing(res) {
+const COMPRESSIBLE = /^(text\/|application\/(?:javascript|json|xml))/;
+
+function send(req, res, status, type, data) {
+  const headers = { "Content-Type": type, "Cache-Control": "no-store", Vary: "Accept-Encoding" };
+  const body = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  const accept = String(req.headers["accept-encoding"] || "");
+  if (COMPRESSIBLE.test(type) && body.length > 256) {
+    if (/\bbr\b/.test(accept)) {
+      headers["Content-Encoding"] = "br";
+      res.writeHead(status, headers);
+      res.end(zlib.brotliCompressSync(body));
+      return;
+    }
+    if (/\bgzip\b/.test(accept)) {
+      headers["Content-Encoding"] = "gzip";
+      res.writeHead(status, headers);
+      res.end(zlib.gzipSync(body));
+      return;
+    }
+  }
+  res.writeHead(status, headers);
+  res.end(body);
+}
+
+function sendMissing(res, req) {
   if (indexOnly) {
-    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-    res.end("Not found");
+    send(req, res, 404, "text/plain; charset=utf-8", "Not found");
     return;
   }
   fs.readFile(path.join(root, "404.html"), (error, data) => {
     if (error) {
-      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end("Not found");
+      send(req, res, 404, "text/plain; charset=utf-8", "Not found");
       return;
     }
-    res.writeHead(404, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
-    res.end(data);
+    send(req, res, 404, "text/html; charset=utf-8", data);
   });
 }
 

@@ -7,6 +7,8 @@ import { stampEstimateRecipient } from "./tools/estimate-mail.js";
 import { canonicalUrl, normalizeSiteOrigin } from "./src/lib/urls.js";
 import { localBusinessJson } from "./src/lib/schema.js";
 import { readImageSize } from "./src/lib/image-size.js";
+import { describeMobile, loadImageCatalog, optimizeImageTags } from "./src/lib/responsive-markup.js";
+import { generateResponsiveImages } from "./tools/responsive-images.js";
 
 dotenv.config();
 
@@ -23,6 +25,32 @@ const pathPrefix = pathPrefixFromEnv();
 const siteUrl = normalizeSiteOrigin(process.env.SITE_URL || "");
 
 export default function (eleventyConfig) {
+  const imageCatalog = () => loadImageCatalog(path.join(root, "src", "assets", "img"));
+  const prefixAsset = (urlPath) => {
+    if (!urlPath || !pathPrefix || pathPrefix === "/") return urlPath;
+    return `${pathPrefix}${urlPath.startsWith("/") ? urlPath : `/${urlPath}`}`;
+  };
+  eleventyConfig.on("eleventy.before", () => {
+    generateResponsiveImages({ root });
+  });
+  eleventyConfig.addFilter("mobilePreload", (urlPath) => {
+    const described = describeMobile(urlPath, imageCatalog());
+    if (!described) return null;
+    return {
+      href: prefixAsset(described.href),
+      srcset: described.srcset
+        .split(", ")
+        .map((part) => {
+          const [url, width] = part.split(" ");
+          return `${prefixAsset(url)} ${width}`;
+        })
+        .join(", "),
+    };
+  });
+  eleventyConfig.addTransform("responsive-images", (content, outputPath) => {
+    if (!String(outputPath || "").endsWith(".html")) return content;
+    return optimizeImageTags(content, imageCatalog());
+  });
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
   eleventyConfig.addPassthroughCopy({ "src/api": "api" });
   eleventyConfig.addWatchTarget("index.html");

@@ -16,6 +16,12 @@ function walk(dir, files = []) {
 function refsIn(text) {
   const refs = new Set();
   for (const match of text.matchAll(/\b(?:href|src)\s*=\s*["']([^"']+)["']/g)) refs.add(match[1]);
+  for (const match of text.matchAll(/\b(?:srcset|imagesrcset)\s*=\s*["']([^"']+)["']/g)) {
+    for (const part of match[1].split(",")) {
+      const url = part.trim().split(/\s+/)[0];
+      if (url) refs.add(url);
+    }
+  }
   for (const match of text.matchAll(/url\(\s*['"]?([^'")]+)['"]?\s*\)/g)) refs.add(match[1]);
   return refs;
 }

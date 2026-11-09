@@ -4,6 +4,7 @@ import { canonicalUrl } from "../src/lib/urls.js";
 
 export function bundleCss({ root, siteUrl = "", pathPrefix = "/" }) {
   const files = [
+    "src/assets/css/local-fonts.css",
     "src/assets/css/fonts.css",
     "build/css/base.css",
     "build/css/hover.css",

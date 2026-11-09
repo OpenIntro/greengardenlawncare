@@ -56,4 +56,5 @@ test("the homepage template converts without leftover design-tool syntax", () =>
   assert.match(converted.hoverCss, /!important/);
   assert.equal(converted.helmet.title.includes("Green Garden Lawn Care"), true);
   assert.equal((converted.html.match(/fetchpriority="high"/g) || []).length, 1);
+  assert.match(converted.html, /data-phone-label data-phone="\{\{ site\.phone \}\}">Call<span class="when-desktop"> \{\{ site\.phone \}\}<\/span>/);
 });
