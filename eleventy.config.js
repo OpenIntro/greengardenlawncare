@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import { bundleCss } from "./tools/bundle-css.js";
+import { bundleJs } from "./tools/bundle-js.js";
 import { stampEstimateRecipient } from "./tools/estimate-mail.js";
 import { canonicalUrl, normalizeSiteOrigin } from "./src/lib/urls.js";
 import { localBusinessJson } from "./src/lib/schema.js";
@@ -70,6 +71,7 @@ export default function (eleventyConfig) {
   );
   eleventyConfig.on("eleventy.after", () => {
     bundleCss({ root, siteUrl, pathPrefix });
+    bundleJs({ root });
     const phpPath = path.join(root, "_site", "api", "estimate.php");
     const recipient = process.env.ESTIMATE_TO || "";
     if (!fs.existsSync(phpPath)) return;

@@ -6,7 +6,7 @@
     "extract": "node tools/extract.js",
     "build": "node tools/extract.js && eleventy",
     "serve": "node tools/extract.js && eleventy --serve --port=8080",
-    "test": "node --test --test-concurrency=1 ./test/extract.test.js ./test/convert.test.js ./test/data.test.js ./test/urls.test.js ./test/schema.test.js ./test/image-size.test.js ./test/deploy-policy.test.js ./test/estimate.test.js ./test/responsive-markup.test.js",
+    "test": "node --test --test-concurrency=1 ./test/extract.test.js ./test/convert.test.js ./test/data.test.js ./test/urls.test.js ./test/schema.test.js ./test/image-size.test.js ./test/deploy-policy.test.js ./test/estimate.test.js ./test/responsive-markup.test.js ./test/bundle.test.js",
     "test:e2e": "playwright test",
     "audit": "node tools/audit.js",
     "verify": "npm run build && npm test && npm run audit && npm run test:e2e",
@@ -17,6 +17,7 @@
     "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.0",
     "dotenv": "^18.0.10",
+    "esbuild": "^0.28.2",
     "pixelmatch": "^8.0.0",
     "pngjs": "^7.0.0",
     "ssh2-sftp-client": "^12.1.1"
