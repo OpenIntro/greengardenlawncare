@@ -67,6 +67,57 @@
   outline-offset: 3px;
 }
 
+/* The booking dot is extracted with an inline gold fill. Keyframes beat that fill
+   while motion is allowed, so the holiday hero blinks through bulb colors.
+   Reduced motion keeps the static gold dot. */
+@media (prefers-reduced-motion: no-preference) {
+  body[data-season="holiday"] #home span[style*="width:7px"][style*="border-radius:50%"] {
+    display: inline-block;
+    transform-origin: center;
+    animation:
+      holiday-booking-color 12s ease-in-out infinite,
+      holiday-booking-glow 2.8s ease-in-out infinite;
+  }
+}
+
+@keyframes holiday-booking-color {
+  0%, 16% {
+    background-color: #ff3b30;
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.28), 0 0 10px 1px rgba(255, 59, 48, 0.85);
+  }
+  20%, 36% {
+    background-color: #30d158;
+    box-shadow: 0 0 0 4px rgba(48, 209, 88, 0.28), 0 0 10px 1px rgba(48, 209, 88, 0.85);
+  }
+  40%, 56% {
+    background-color: #ffd60a;
+    box-shadow: 0 0 0 4px rgba(255, 214, 10, 0.3), 0 0 10px 1px rgba(255, 214, 10, 0.8);
+  }
+  60%, 76% {
+    background-color: #4da3ff;
+    box-shadow: 0 0 0 4px rgba(77, 163, 255, 0.28), 0 0 10px 1px rgba(77, 163, 255, 0.85);
+  }
+  80%, 96% {
+    background-color: #fff4cc;
+    box-shadow: 0 0 0 4px rgba(255, 244, 204, 0.32), 0 0 10px 1px rgba(255, 244, 204, 0.75);
+  }
+  100% {
+    background-color: #ff3b30;
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.28), 0 0 10px 1px rgba(255, 59, 48, 0.85);
+  }
+}
+
+@keyframes holiday-booking-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.38;
+    transform: scale(0.68);
+  }
+}
+
 .block-media {
   display: block;
   width: 100%;
