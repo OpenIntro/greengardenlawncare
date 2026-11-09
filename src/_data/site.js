@@ -30,6 +30,9 @@ const site = {
   areaServed: "North Texas",
   season: resolveSeason(process.env.SEASON, configuredSeason),
   url: normalizeSiteOrigin(process.env.SITE_URL || ""),
+  ogImage: "/assets/og/greengarden-holiday-home-showcase.jpg",
+  ogImageAlt:
+    "Green Garden Lawn Care logo beside a two-story home outlined in multicolor holiday lights",
 };
 
 export default site;

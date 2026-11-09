@@ -15,8 +15,8 @@
 <meta property="og:url" content="{{ page.url | share }}">
 <meta property="og:site_name" content="{{ site.name }}">
 <meta property="og:locale" content="en_US">
-{% set shareImage = heroImage %}
-{% set shareAlt = heroAlt %}
+{% set shareImage = site.ogImage or heroImage %}
+{% set shareAlt = site.ogImageAlt or heroAlt %}
 {% if not shareImage %}
 {% set shareImage = "/assets/img/green-garden-lawn-care-logo.jpg" %}
 {% set shareAlt = site.name %}
