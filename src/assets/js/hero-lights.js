@@ -167,3 +167,171 @@ export function findBulbs(bitmap) {
   }
   return bulbs;
 }
+
+const MIN_BULBS = 30;
+
+export function shouldPlay({ hidden, visible }) {
+  return !hidden && visible;
+}
+
+function objectPosition(image, win) {
+  const raw = win.getComputedStyle(image).objectPosition || "50% 50%";
+  const parts = raw.trim().split(/\s+/);
+  const fraction = (part) => (part?.endsWith("%") ? Number.parseFloat(part) / 100 : 0.5);
+  return { x: fraction(parts[0]), y: fraction(parts[1] ?? "50%") };
+}
+
+async function loadHero(image) {
+  if (image.complete && image.naturalWidth > 0) return true;
+  try {
+    if (typeof image.decode === "function") {
+      await image.decode();
+      return image.naturalWidth > 0;
+    }
+  } catch {
+    return false;
+  }
+  return new Promise((resolve) => {
+    image.addEventListener("load", () => resolve(image.naturalWidth > 0), { once: true });
+    image.addEventListener("error", () => resolve(false), { once: true });
+  });
+}
+
+function captureBitmap(image, doc) {
+  const width = Math.min(960, image.naturalWidth);
+  const height = Math.max(1, Math.round(image.naturalHeight * (width / image.naturalWidth)));
+  const canvas = doc.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  if (!context) throw new Error("canvas unavailable");
+  context.drawImage(image, 0, 0, width, height);
+  const imageData = context.getImageData(0, 0, width, height);
+  return { data: imageData.data, width, height };
+}
+
+function mount(image, doc, win, bitmap, bulbs) {
+  const hero = image.closest("#home") ?? image;
+  const canvas = doc.createElement("canvas");
+  canvas.setAttribute("aria-hidden", "true");
+  canvas.style.position = "absolute";
+  canvas.style.inset = "0";
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  canvas.style.pointerEvents = "none";
+  canvas.style.mixBlendMode = "multiply";
+  image.insertAdjacentElement("afterend", canvas);
+  const context = canvas.getContext("2d");
+  if (!context) {
+    canvas.remove();
+    return;
+  }
+
+  let frame = 0;
+  let playing = false;
+  let visible = false;
+
+  function resize() {
+    const dpr = Math.min(win.devicePixelRatio || 1, 2);
+    const cssWidth = image.clientWidth;
+    const cssHeight = image.clientHeight;
+    if (cssWidth < 1 || cssHeight < 1) return;
+    canvas.width = Math.round(cssWidth * dpr);
+    canvas.height = Math.round(cssHeight * dpr);
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function paint(time) {
+    const cssWidth = image.clientWidth;
+    const cssHeight = image.clientHeight;
+    if (cssWidth < 1 || cssHeight < 1) return;
+    context.clearRect(0, 0, cssWidth, cssHeight);
+    const position = objectPosition(image, win);
+    const scale = Math.max(cssWidth / bitmap.width, cssHeight / bitmap.height);
+    for (const bulb of bulbs) {
+      const brightness = brightnessAt(time, bulb.phase, bulb.period);
+      if (brightness >= 0.999) continue;
+      const point = mapCoverPoint(
+        bitmap.width,
+        bitmap.height,
+        cssWidth,
+        cssHeight,
+        position.x,
+        position.y,
+        bulb.x,
+        bulb.y,
+      );
+      const radius = bulb.radius * scale;
+      const channel = Math.round(brightness * 255);
+      const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+      gradient.addColorStop(0, `rgb(${channel},${channel},${channel})`);
+      gradient.addColorStop(1, "rgb(255,255,255)");
+      context.fillStyle = gradient;
+      context.beginPath();
+      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      context.fill();
+    }
+  }
+
+  function stop() {
+    playing = false;
+    if (frame) win.cancelAnimationFrame(frame);
+    frame = 0;
+  }
+
+  function start() {
+    if (playing) return;
+    playing = true;
+    frame = win.requestAnimationFrame(tick);
+  }
+
+  function tick(time) {
+    if (!playing) return;
+    paint(time);
+    frame = win.requestAnimationFrame(tick);
+  }
+
+  function sync() {
+    if (shouldPlay({ hidden: doc.hidden, visible })) start();
+    else stop();
+  }
+
+  resize();
+  const observer = new win.IntersectionObserver((entries) => {
+    visible = entries.some((entry) => entry.isIntersecting);
+    sync();
+  });
+  observer.observe(hero);
+  doc.addEventListener("visibilitychange", sync);
+  const resizeObserver = new win.ResizeObserver(() => {
+    resize();
+  });
+  resizeObserver.observe(image);
+}
+
+async function run(image, doc, win) {
+  const ready = await loadHero(image);
+  if (!ready) return;
+  let bitmap;
+  try {
+    bitmap = captureBitmap(image, doc);
+  } catch {
+    return;
+  }
+  const found = findBulbs(bitmap);
+  if (found.length < MIN_BULBS) return;
+  const bulbs = found.map((bulb) => {
+    const period = 1600 + Math.random() * 1400;
+    return { ...bulb, period, phase: Math.random() * period };
+  });
+  mount(image, doc, win, bitmap, bulbs);
+}
+
+export function startHeroLights(doc = globalThis.document, win = globalThis.window) {
+  if (!doc?.body || !win?.matchMedia) return;
+  const reducedMotion = win.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!shouldTwinkle({ season: doc.body.dataset.season, reducedMotion })) return;
+  const image = doc.querySelector("#home img");
+  if (!image) return;
+  void run(image, doc, win);
+}

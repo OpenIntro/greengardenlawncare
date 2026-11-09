@@ -1,4 +1,5 @@
 import { SEND_FAILURE, estimateOutcome, validateEstimate } from "./estimate-outcome.js";
+import { startHeroLights } from "./hero-lights.js";
 
 const desktop = window.matchMedia("(min-width: 900px)");
 const headerTones = {
@@ -312,3 +313,4 @@ desktop.addEventListener("change", () => {
 applyChrome();
 layoutGallery();
 observeReveals();
+startHeroLights();

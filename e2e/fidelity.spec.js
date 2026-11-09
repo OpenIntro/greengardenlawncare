@@ -64,11 +64,13 @@ test("home matches the design bundle", async ({ page, browser }) => {
   const view = "home";
   const cap = VIEW_DIFF_CAPS[view] ?? MAX_DIFF_RATIO;
   await arm(page);
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("http://127.0.0.1:4173/");
   const season = await page.locator("body").getAttribute("data-season");
 
   const original = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   await arm(original);
+  await original.emulateMedia({ reducedMotion: "reduce" });
   await original.goto("http://127.0.0.1:4174/");
   await original.waitForFunction(() => window.__dcRootName && document.querySelector("h1"));
   await original.evaluate((nextSeason) => {

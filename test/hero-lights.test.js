@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { brightnessAt, findBulbs, mapCoverPoint, shouldTwinkle } from "../src/assets/js/hero-lights.js";
+import {
+  brightnessAt,
+  findBulbs,
+  mapCoverPoint,
+  shouldPlay,
+  shouldTwinkle,
+  startHeroLights,
+} from "../src/assets/js/hero-lights.js";
 
 test("twinkle runs only for the holiday hero when motion is allowed", () => {
   assert.equal(shouldTwinkle({ season: "holiday", reducedMotion: false }), true);
@@ -85,4 +92,37 @@ test("findBulbs splits an elongated strand at its brightness peaks", () => {
     assert.ok(Math.abs(bulbs[index].x - expectedX[index]) < 1e-9);
     assert.ok(Math.abs(bulbs[index].y - 2) < 1e-9);
   }
+});
+
+test("playback pauses while the tab is hidden or the hero is off screen", () => {
+  assert.equal(shouldPlay({ hidden: false, visible: true }), true);
+  assert.equal(shouldPlay({ hidden: true, visible: true }), false);
+  assert.equal(shouldPlay({ hidden: false, visible: false }), false);
+});
+
+test("startHeroLights does not look for a hero when twinkle is off", () => {
+  for (const [season, reducedMotion] of [["standard", false], ["holiday", true]]) {
+    let queried = false;
+    const doc = {
+      body: { dataset: { season } },
+      querySelector() {
+        queried = true;
+        return null;
+      },
+    };
+    const win = { matchMedia: () => ({ matches: reducedMotion }) };
+    startHeroLights(doc, win);
+    assert.equal(queried, false);
+  }
+});
+
+test("startHeroLights does nothing when the holiday page has no hero image", () => {
+  const doc = {
+    body: { dataset: { season: "holiday" } },
+    querySelector() {
+      return null;
+    },
+  };
+  const win = { matchMedia: () => ({ matches: false }) };
+  assert.doesNotThrow(() => startHeroLights(doc, win));
 });
