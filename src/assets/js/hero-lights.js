@@ -2,10 +2,11 @@ export function shouldTwinkle({ season, reducedMotion }) {
   return season === "holiday" && !reducedMotion;
 }
 
-export function brightnessAt(timeMs, phaseMs, periodMs) {
+export function brightnessAt(timeMs, phaseMs, periodMs, depth = 0.45) {
   const turns = ((timeMs - phaseMs) / periodMs) * Math.PI * 2;
-  const value = 0.75 + 0.25 * Math.cos(turns);
-  return Math.min(1, Math.max(0.5, value));
+  const wink = (1 - Math.cos(turns)) / 2;
+  const value = 1 - depth * wink * wink;
+  return Math.min(1, Math.max(1 - depth, value));
 }
 
 export function mapCoverPoint(imageWidth, imageHeight, elementWidth, elementHeight, positionX, positionY, imageX, imageY) {
@@ -30,7 +31,8 @@ function isBulbPixel(red, green, blue) {
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const delta = max - min;
-  if (max < 0.55 || delta === 0) return false;
+  // Cream brick and warm concrete keep every channel high. A lamp drops one channel near zero.
+  if (max < 0.55 || delta === 0 || min / max > 0.35) return false;
   const lightness = (max + min) / 2;
   const saturation = delta / (1 - Math.abs(2 * lightness - 1));
   if (saturation < 0.45) return false;
@@ -57,6 +59,8 @@ function bulbFrom(pixels) {
   for (const pixel of pixels) {
     farthest = Math.max(farthest, Math.hypot(pixel.x - x, pixel.y - y));
   }
+  // A real lamp is a small point. Wider patches are lit walls and merged glow.
+  if (farthest > 9) return null;
   return { x, y, radius: farthest * 1.8 };
 }
 
@@ -122,6 +126,36 @@ function bulbsFromCluster(pixels) {
   return groups.map(bulbFrom).filter(Boolean);
 }
 
+function channelPeak(data, offset) {
+  return Math.max(data[offset], data[offset + 1], data[offset + 2]) / 255;
+}
+
+function standsOut(data, width, height, x, y) {
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  let count = 0;
+  for (let offsetY = -4; offsetY <= 4; offsetY += 1) {
+    for (let offsetX = -4; offsetX <= 4; offsetX += 1) {
+      const nextX = x + offsetX;
+      const nextY = y + offsetY;
+      if (nextX < 0 || nextY < 0 || nextX >= width || nextY >= height) continue;
+      const offset = (nextY * width + nextX) * 4;
+      sumR += data[offset];
+      sumG += data[offset + 1];
+      sumB += data[offset + 2];
+      count += 1;
+    }
+  }
+  const offset = (y * width + x) * 4;
+  const distance = Math.hypot(
+    data[offset] - sumR / count,
+    data[offset + 1] - sumG / count,
+    data[offset + 2] - sumB / count,
+  );
+  return distance >= 28;
+}
+
 export function findBulbs(bitmap) {
   const { data, width, height } = bitmap;
   const mask = new Uint8Array(width * height);
@@ -130,9 +164,10 @@ export function findBulbs(bitmap) {
     for (let x = 0; x < width; x += 1) {
       const offset = (y * width + x) * 4;
       if (!isBulbPixel(data[offset], data[offset + 1], data[offset + 2])) continue;
+      if (!standsOut(data, width, height, x, y)) continue;
       const index = y * width + x;
       mask[index] = 1;
-      bright[index] = Math.max(data[offset], data[offset + 1], data[offset + 2]) / 255;
+      bright[index] = channelPeak(data, offset);
     }
   }
   const seen = new Uint8Array(width * height);
@@ -249,8 +284,8 @@ function mount(image, doc, win, bitmap, bulbs) {
     const position = objectPosition(image, win);
     const scale = Math.max(cssWidth / bitmap.width, cssHeight / bitmap.height);
     for (const bulb of bulbs) {
-      const brightness = brightnessAt(time, bulb.phase, bulb.period);
-      if (brightness >= 0.999) continue;
+      const brightness = brightnessAt(time, bulb.phase, bulb.period, bulb.depth);
+      if (brightness >= 0.985) continue;
       const point = mapCoverPoint(
         bitmap.width,
         bitmap.height,
@@ -265,6 +300,7 @@ function mount(image, doc, win, bitmap, bulbs) {
       const channel = Math.round(brightness * 255);
       const gradient = context.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
       gradient.addColorStop(0, `rgb(${channel},${channel},${channel})`);
+      gradient.addColorStop(0.32, `rgb(${channel},${channel},${channel})`);
       gradient.addColorStop(1, "rgb(255,255,255)");
       context.fillStyle = gradient;
       context.beginPath();
@@ -321,8 +357,9 @@ async function run(image, doc, win) {
   const found = findBulbs(bitmap);
   if (found.length < MIN_BULBS) return;
   const bulbs = found.map((bulb) => {
-    const period = 1600 + Math.random() * 1400;
-    return { ...bulb, period, phase: Math.random() * period };
+    const period = 1400 + Math.random() * 2600;
+    const depth = 0.38 + Math.random() * 0.14;
+    return { ...bulb, period, phase: Math.random() * period, depth };
   });
   mount(image, doc, win, bitmap, bulbs);
 }

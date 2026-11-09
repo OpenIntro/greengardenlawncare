@@ -16,15 +16,16 @@ test("twinkle runs only for the holiday hero when motion is allowed", () => {
   assert.equal(shouldTwinkle({ season: "standard", reducedMotion: true }), false);
 });
 
-test("brightness follows the sine ease from full to half", () => {
+test("brightness stays full and winks briefly", () => {
   assert.equal(brightnessAt(0, 0, 2000), 1);
-  assert.ok(Math.abs(brightnessAt(1000, 0, 2000) - 0.5) < 1e-10);
-  assert.equal(brightnessAt(0, 0, 2000), 1);
-  assert.ok(Math.abs(brightnessAt(0, 1000, 2000) - 0.5) < 1e-10);
+  assert.ok(Math.abs(brightnessAt(1000, 0, 2000) - 0.55) < 1e-8);
+  assert.ok(Math.abs(brightnessAt(0, 1000, 2000) - 0.55) < 1e-8);
   for (let time = 0; time <= 4000; time += 125) {
     const value = brightnessAt(time, 250, 1800);
-    assert.ok(value >= 0.5 && value <= 1);
+    assert.ok(value >= 0.55 && value <= 1);
   }
+  const quarter = brightnessAt(500, 0, 2000);
+  assert.ok(quarter > 0.85);
 });
 
 test("mapCoverPoint follows object-fit cover at 70% 40%", () => {
@@ -80,6 +81,36 @@ test("findBulbs keeps small colored lamps and rejects floods, windows, and stars
   }
 });
 
+test("findBulbs ignores a flat warm wall and keeps a lamp on it", () => {
+  const picture = bitmap(40, 30, (set) => {
+    fill(set, 0, 0, 40, 30, [230, 210, 180]);
+    fill(set, 18, 13, 4, 4, [255, 40, 40]);
+  });
+  const bulbs = findBulbs(picture);
+  assert.equal(bulbs.length, 1);
+  assert.ok(bulbs[0].x > 18 && bulbs[0].x < 22);
+  assert.ok(bulbs[0].y > 13 && bulbs[0].y < 17);
+});
+
+test("findBulbs ignores textured cream brick and warm concrete", () => {
+  const picture = bitmap(48, 36, (set) => {
+    for (let y = 0; y < 36; y += 1) {
+      for (let x = 0; x < 48; x += 1) {
+        const brick = (x + y) % 2 === 0 ? [230, 180, 145] : [205, 155, 120];
+        set(x, y, brick[0], brick[1], brick[2]);
+      }
+    }
+    fill(set, 8, 8, 4, 4, [255, 30, 30]);
+    fill(set, 30, 22, 4, 4, [40, 40, 255]);
+  });
+  const bulbs = findBulbs(picture).sort((a, b) => a.x - b.x);
+  assert.equal(bulbs.length, 2);
+  assert.ok(bulbs[0].x > 8 && bulbs[0].x < 12);
+  assert.ok(bulbs[0].y > 8 && bulbs[0].y < 12);
+  assert.ok(bulbs[1].x > 30 && bulbs[1].x < 34);
+  assert.ok(bulbs[1].y > 22 && bulbs[1].y < 26);
+});
+
 test("findBulbs splits an elongated strand at its brightness peaks", () => {
   const strand = bitmap(60, 5, (set) => {
     fill(set, 0, 0, 60, 5, [180, 0, 0]);
@@ -87,11 +118,8 @@ test("findBulbs splits an elongated strand at its brightness peaks", () => {
   });
   const bulbs = findBulbs(strand).sort((a, b) => a.x - b.x);
   assert.equal(bulbs.length, 3);
-  const expectedX = [8.5, 30, 51];
-  for (let index = 0; index < expectedX.length; index += 1) {
-    assert.ok(Math.abs(bulbs[index].x - expectedX[index]) < 1e-9);
-    assert.ok(Math.abs(bulbs[index].y - 2) < 1e-9);
-  }
+  assert.deepEqual(bulbs.map((bulb) => bulb.x), [5, 30, 54]);
+  for (const bulb of bulbs) assert.equal(bulb.y, 2);
 });
 
 test("playback pauses while the tab is hidden or the hero is off screen", () => {
