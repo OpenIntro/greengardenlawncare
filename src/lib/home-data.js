@@ -2,8 +2,8 @@ import { HEADER_CHROME, galleryLayout, heroFor, phoneLabel } from "./season.js";
 
 export const GALLERY = [
   {
-    key: "two-story-north-texas-home-outlined-in-multicolor-holiday-lights",
-    alt: "Two-story North Texas home outlined in multicolor holiday lights",
+    key: "starry-night-two-story-home-with-multicolor-holiday-lights",
+    alt: "Large two-story home with colorful holiday lights outlining its rooflines under a starry night sky",
     cat: "holiday",
     label: "Multicolor roofline lighting",
   },

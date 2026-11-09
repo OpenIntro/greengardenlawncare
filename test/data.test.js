@@ -50,7 +50,6 @@ test("gallery spans match the desktop design", () => {
 test("homepage data uses the season image and does not invent contact facts", () => {
   const assets = {
     "starry-night-two-story-home-with-multicolor-holiday-lights": { src: "/assets/img/holiday.jpg" },
-    "two-story-north-texas-home-outlined-in-multicolor-holiday-lights": { src: "/assets/img/gallery-holiday.jpg" },
     "freshly-mowed-lawn-with-clean-edges-in-front-of-a-brick-home": { src: "/assets/img/lawn.jpg" },
     "warm-white-holiday-lights-installed-along-a-homes-roofline": { src: "/a.jpg" },
     "neatly-rounded-shrubs-in-a-mulched-bed-beside-a-front-porch": { src: "/b.jpg" },
@@ -62,6 +61,8 @@ test("homepage data uses the season image and does not invent contact facts", ()
   const standard = buildHomeData({ ...site, season: "standard" }, assets);
   assert.equal(holiday.heroImage, "/assets/img/holiday.jpg");
   assert.equal(standard.heroImage, "/assets/img/lawn.jpg");
+  assert.equal(holiday.galleryItems[0].label, "Multicolor roofline lighting");
+  assert.equal(holiday.galleryItems[0].src, holiday.heroImage);
   assert.equal(holiday.galleryItems.length, 7);
   assert.deepEqual(holiday.services, [
     "Holiday Light Installation",
