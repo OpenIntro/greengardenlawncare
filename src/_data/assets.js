@@ -4,7 +4,7 @@ export default {
     "src": "/assets/img/green-garden-lawn-care-logo.jpg",
     "mime": "image/jpeg",
     "alt": "Green Garden Lawn Care logo",
-    "bytes": 16581
+    "bytes": 30235
   },
   "warm-white-holiday-lights-installed-along-a-homes-roofline": {
     "src": "/assets/img/warm-white-holiday-lights-installed-along-a-homes-roofline.jpg",
@@ -49,9 +49,9 @@ export default {
     "bytes": 254902
   },
   "starry-night-two-story-home-with-multicolor-holiday-lights": {
-    "src": "/assets/img/starry-night-two-story-home-with-multicolor-holiday-lights.jpg",
-    "mime": "image/jpeg",
+    "src": "/assets/img/starry-night-two-story-home-with-multicolor-holiday-lights.webp",
+    "mime": "image/webp",
     "alt": "Starry night two-story home with multicolor holiday lights",
-    "bytes": 183101
+    "bytes": 359052
   }
 };

@@ -24,12 +24,10 @@ test("readImageSize reads the published logo", () => {
 test("readImageSize reads the holiday share photo", () => {
   const photo = fs.readFileSync(
     new URL(
-      "../src/assets/img/starry-night-two-story-home-with-multicolor-holiday-lights.jpg",
+      "../src/assets/img/starry-night-two-story-home-with-multicolor-holiday-lights.webp",
       import.meta.url,
     ),
   );
   const size = readImageSize(photo);
-  assert.equal(size.type, "image/jpeg");
-  assert.equal(size.width >= 200, true);
-  assert.equal(size.height >= 200, true);
+  assert.deepEqual(size, { width: 2892, height: 2174, type: "image/webp" });
 });

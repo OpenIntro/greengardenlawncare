@@ -60,15 +60,16 @@ test("unpack fails when a payload is missing or invalid", () => {
   assert.throws(() => unpack(invalid), /Invalid image\/png payload/);
 });
 
-test("the design bundle is one homepage of jpeg assets", () => {
+test("the design bundle is one homepage and the holiday hero is webp", () => {
   const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const bundle = unpack(html);
   assert.deepEqual(bundle.views, ["home"]);
   assert.equal(bundle.format, "x-dc");
   assert.equal(bundle.assets.length, 9);
-  assert.ok(bundle.assets.every((asset) => asset.mime === "image/jpeg"));
+  const hero = bundle.assets.find((asset) => asset.key === "starry-night-two-story-home-with-multicolor-holiday-lights");
+  assert.equal(hero.mime, "image/webp");
+  assert.ok(bundle.assets.filter((asset) => asset !== hero).every((asset) => asset.mime === "image/jpeg"));
   assert.ok(bundle.assets.some((asset) => asset.key === "green-garden-lawn-care-logo"));
-  assert.ok(bundle.assets.some((asset) => asset.key === "starry-night-two-story-home-with-multicolor-holiday-lights"));
   assert.ok(bundle.assets.some((asset) => asset.key === "neatly-edged-corner-lot-lawn-after-mowing"));
   assert.equal(bundle.template.includes("Beautiful Homes."), true);
 });

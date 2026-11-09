@@ -2,9 +2,11 @@ const JPEG_START = new Set([
   0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf,
 ]);
 
-/** Width and height from a JPEG or PNG buffer. Returns null when the format is unknown. */
+/** Width and height from a JPEG, PNG, or WebP buffer. Returns null when the format is unknown. */
 export function readImageSize(buffer) {
   if (!buffer || buffer.length < 10) return null;
+  const webp = readWebpSize(buffer);
+  if (webp) return webp;
   if (
     buffer.length >= 24 &&
     buffer[0] === 0x89 &&
@@ -42,6 +44,37 @@ export function readImageSize(buffer) {
       };
     }
     offset += 2 + length;
+  }
+  return null;
+}
+
+function readWebpSize(buffer) {
+  if (buffer.length < 30) return null;
+  if (buffer.toString("ascii", 0, 4) !== "RIFF" || buffer.toString("ascii", 8, 12) !== "WEBP") return null;
+  const chunk = buffer.toString("ascii", 12, 16);
+  if (chunk === "VP8X") {
+    return {
+      width: 1 + buffer.readUIntLE(24, 3),
+      height: 1 + buffer.readUIntLE(27, 3),
+      type: "image/webp",
+    };
+  }
+  if (chunk === "VP8 ") {
+    if (buffer[23] !== 0x9d || buffer[24] !== 0x01 || buffer[25] !== 0x2a) return null;
+    return {
+      width: buffer.readUInt16LE(26) & 0x3fff,
+      height: buffer.readUInt16LE(28) & 0x3fff,
+      type: "image/webp",
+    };
+  }
+  if (chunk === "VP8L") {
+    if (buffer[20] !== 0x2f) return null;
+    const bits = buffer.readUInt32LE(21);
+    return {
+      width: (bits & 0x3fff) + 1,
+      height: ((bits >> 14) & 0x3fff) + 1,
+      type: "image/webp",
+    };
   }
   return null;
 }
