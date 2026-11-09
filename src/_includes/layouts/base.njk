@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<link rel="canonical" href="{{ page.url | share }}">
+<meta property="og:title" content="{{ title }}">
+<meta property="og:description" content="{{ description }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ page.url | share }}">
+<meta property="og:image" content="{{ heroImage | share }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ title }}">
+<meta name="twitter:description" content="{{ description }}">
+<meta name="twitter:image" content="{{ heroImage | share }}">
+{% include "build/chrome/font-links.njk" %}
+<link rel="stylesheet" href="{{ '/assets/css/site.css' | url }}">
+{% if schema == "LocalBusiness" %}
+<script type="application/ld+json">{{ site | jsonLd(page.url | share) | safe }}</script>
+{% endif %}
+</head>
+<body data-season="{{ site.season }}">
+<div id="dc-root">
+<div class="sc-host" data-sc-name="home">
+<a class="skip-link" href="#main">Skip to content</a>
+{{ content | safe }}
+</div>
+</div>
+{% if needsJs %}
+<script type="module" src="{{ '/assets/js/home.js' | url }}"></script>
+{% endif %}
+</body>
+</html>

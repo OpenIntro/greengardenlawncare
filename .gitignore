@@ -1,0 +1,10 @@
+node_modules/
+_site/
+build/
+.env
+.deploy-manifest.json
+e2e/screenshots/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
