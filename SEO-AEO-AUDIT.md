@@ -60,7 +60,7 @@ Not implemented on purpose: FAQ schema, extra city or service URLs, review marku
 
 - Bare hostnames in `SITE_URL` are published as `https`. An explicit `http://` or `https://` origin is left alone. `.env` was not edited.
 - Homepage JSON-LD is one graph: `WebSite`, `LocalBusiness`, `WebPage`. Services and descriptions are the four cards on the page. Offers have no price. Address, hours, ratings, and reviews are omitted.
-- Open Graph and Twitter tags use the absolute hero image and its alt text, plus site name and `en_US`.
+- Open Graph and Twitter tags use the absolute hero image, its alt text, site name, and `en_US`. The image type, width, and height come from the file itself. Pages without a hero use the logo when it is at least 200 pixels on both sides.
 - The hero image is preloaded and marked `fetchpriority="high"`. Gallery images stay lazy.
 - `robots.txt` disallows `/api/` and points at the absolute sitemap. The sitemap lists only `/`.
 - Estimate responses send `noindex`.

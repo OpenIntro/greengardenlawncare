@@ -6,6 +6,7 @@ import { bundleCss } from "./tools/bundle-css.js";
 import { stampEstimateRecipient } from "./tools/estimate-mail.js";
 import { canonicalUrl, normalizeSiteOrigin } from "./src/lib/urls.js";
 import { localBusinessJson } from "./src/lib/schema.js";
+import { readImageSize } from "./src/lib/image-size.js";
 
 dotenv.config();
 
@@ -29,6 +30,13 @@ export default function (eleventyConfig) {
   eleventyConfig.addWatchTarget("src/assets");
   eleventyConfig.addFilter("tf", (value) => (value ? "true" : "false"));
   eleventyConfig.addFilter("share", (urlPath) => canonicalUrl(siteUrl, pathPrefix, urlPath || "/"));
+  eleventyConfig.addFilter("imageMeta", (urlPath) => {
+    const relative = String(urlPath || "").split("?")[0].split("#")[0].replace(/^\/+/, "");
+    if (!relative || relative.split("/").includes("..")) return {};
+    const file = path.join(root, "src", relative);
+    if (!file.startsWith(path.join(root, "src") + path.sep) || !fs.existsSync(file)) return {};
+    return readImageSize(fs.readFileSync(file)) || {};
+  });
   eleventyConfig.addFilter("jsonLd", (site, canonical, image, title, description, logo) =>
     localBusinessJson(site, canonical, { image, title, description, logo }),
   );
