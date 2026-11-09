@@ -33,4 +33,5 @@ test("published javascript is one minified module", () => {
   );
   assert.ok(js.length < sourceLength);
   assert.equal(fs.existsSync(path.join(root, "_site", "assets", "js", "estimate-outcome.js")), false);
+  assert.equal(fs.existsSync(path.join(root, "_site", "assets", "js", "hero-lights.js")), false);
 });

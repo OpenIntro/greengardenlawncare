@@ -17,6 +17,7 @@ export function bundleJs({ root }) {
     outfile,
   });
   fs.rmSync(path.join(outDir, "estimate-outcome.js"), { force: true });
+  fs.rmSync(path.join(outDir, "hero-lights.js"), { force: true });
   const js = fs.readFileSync(outfile, "utf8");
   return { js };
 }
