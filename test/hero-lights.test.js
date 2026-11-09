@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { brightnessAt, shouldTwinkle } from "../src/assets/js/hero-lights.js";
+import { brightnessAt, mapCoverPoint, shouldTwinkle } from "../src/assets/js/hero-lights.js";
 
 test("twinkle runs only for the holiday hero when motion is allowed", () => {
   assert.equal(shouldTwinkle({ season: "holiday", reducedMotion: false }), true);
@@ -18,4 +18,10 @@ test("brightness follows the sine ease from full to half", () => {
     const value = brightnessAt(time, 250, 1800);
     assert.ok(value >= 0.5 && value <= 1);
   }
+});
+
+test("mapCoverPoint follows object-fit cover at 70% 40%", () => {
+  const point = mapCoverPoint(200, 100, 100, 100, 0.7, 0.4, 100, 50);
+  assert.equal(point.x, 30);
+  assert.equal(point.y, 50);
 });
