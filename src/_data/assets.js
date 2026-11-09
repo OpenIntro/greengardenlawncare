@@ -52,6 +52,6 @@ export default {
     "src": "/assets/img/starry-night-two-story-home-with-multicolor-holiday-lights.jpg",
     "mime": "image/jpeg",
     "alt": "Starry night two-story home with multicolor holiday lights",
-    "bytes": 210055
+    "bytes": 183101
   }
 };
