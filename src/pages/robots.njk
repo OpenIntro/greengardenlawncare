@@ -3,6 +3,9 @@ permalink: /robots.txt
 eleventyExcludeFromCollections: true
 ---
 User-agent: *
-Allow: /
+Disallow: /api/
+{%- set sitemap = "/sitemap.xml" | share -%}
+{%- if sitemap.slice(0, 4) == "http" %}
 
-Sitemap: {{ "/sitemap.xml" | share }}
+Sitemap: {{ sitemap }}
+{% endif %}

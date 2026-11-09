@@ -9,9 +9,18 @@ export function withPrefix(pathPrefix, urlPath) {
   return collapsed;
 }
 
+/** Origin only. A bare hostname is published as https. Paths stay in PATH_PREFIX. */
+export function normalizeSiteOrigin(siteUrl) {
+  const raw = String(siteUrl || "").trim().replace(/\/+$/, "");
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith("//")) return `https:${raw}`;
+  return `https://${raw.replace(/^\/+/, "")}`;
+}
+
 export function canonicalUrl(siteUrl, pathPrefix, pagePath) {
   const path = withPrefix(pathPrefix, pagePath || "/");
-  const origin = String(siteUrl || "").replace(/\/$/, "");
+  const origin = normalizeSiteOrigin(siteUrl);
   if (!origin) return path;
   return `${origin}${path.startsWith("/") ? path : `/${path}`}`;
 }

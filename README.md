@@ -36,4 +36,4 @@ Copy `.env.example` to `.env`. Deploy reads the host, user, credential, and remo
 
 `--delete` runs only when the remote directory is this site's document root and `site-identity.txt` there reads `Green Garden Lawn Care`. The first deploy has to be without `--delete` so that identity file exists. `.well-known` and `cgi-bin` are never deleted. `.env` and the deploy manifest stay out of git.
 
-The estimate form posts to `src/api/estimate.php` when JavaScript is off. The script checks the fields and does not send email. `ESTIMATE_TO` is reserved and unused.
+The estimate form posts to `src/api/estimate.php`. With JavaScript, the page sends that same request and shows the success panel only after the script accepts it. The script sends two branded messages, with the logo and the site colors: a thank-you recap to the visitor, and the request to `ESTIMATE_TO`. Mail is sent from `chris@greengardenlawncare.com`. The build writes `ESTIMATE_TO` into the copy under `_site`. Deploy refuses to upload a handler that still has the placeholder.

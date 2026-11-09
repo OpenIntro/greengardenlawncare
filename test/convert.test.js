@@ -55,4 +55,5 @@ test("the homepage template converts without leftover design-tool syntax", () =>
   assert.match(converted.hoverCss, /:hover\{/);
   assert.match(converted.hoverCss, /!important/);
   assert.equal(converted.helmet.title.includes("Green Garden Lawn Care"), true);
+  assert.equal((converted.html.match(/fetchpriority="high"/g) || []).length, 1);
 });

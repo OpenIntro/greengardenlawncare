@@ -1,8 +1,13 @@
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
 import { bundleCss } from "./tools/bundle-css.js";
-import { canonicalUrl } from "./src/lib/urls.js";
+import { stampEstimateRecipient } from "./tools/estimate-mail.js";
+import { canonicalUrl, normalizeSiteOrigin } from "./src/lib/urls.js";
 import { localBusinessJson } from "./src/lib/schema.js";
+
+dotenv.config();
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -14,7 +19,7 @@ function pathPrefixFromEnv() {
 }
 
 const pathPrefix = pathPrefixFromEnv();
-const siteUrl = process.env.SITE_URL || "";
+const siteUrl = normalizeSiteOrigin(process.env.SITE_URL || "");
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
@@ -24,9 +29,19 @@ export default function (eleventyConfig) {
   eleventyConfig.addWatchTarget("src/assets");
   eleventyConfig.addFilter("tf", (value) => (value ? "true" : "false"));
   eleventyConfig.addFilter("share", (urlPath) => canonicalUrl(siteUrl, pathPrefix, urlPath || "/"));
-  eleventyConfig.addFilter("jsonLd", (site, canonical) => localBusinessJson(site, canonical));
+  eleventyConfig.addFilter("jsonLd", (site, canonical, image, title, description, logo) =>
+    localBusinessJson(site, canonical, { image, title, description, logo }),
+  );
   eleventyConfig.on("eleventy.after", () => {
     bundleCss({ root, siteUrl, pathPrefix });
+    const phpPath = path.join(root, "_site", "api", "estimate.php");
+    const recipient = process.env.ESTIMATE_TO || "";
+    if (!fs.existsSync(phpPath)) return;
+    if (!recipient.trim()) {
+      console.warn("ESTIMATE_TO is empty. The estimate form will not send mail until it is set and the site is rebuilt.");
+      return;
+    }
+    fs.writeFileSync(phpPath, stampEstimateRecipient(fs.readFileSync(phpPath, "utf8"), recipient));
   });
 
   return {

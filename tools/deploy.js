@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import dotenv from "dotenv";
 import { assertDeleteAllowed, shouldSkipRemote } from "./deploy-policy.js";
+import { assertEstimateStamped } from "./estimate-mail.js";
 
 dotenv.config();
 
@@ -58,6 +59,8 @@ async function main() {
     const build = spawnSync("npm", ["run", "build"], { stdio: "inherit", shell: true });
     if (build.status !== 0) process.exit(build.status ?? 1);
   }
+  const estimatePhp = path.resolve("_site/api/estimate.php");
+  assertEstimateStamped(fs.readFileSync(estimatePhp, "utf8"));
   const host = required("SFTP_HOST");
   const user = required("SFTP_USER");
   const remoteRoot = required("SFTP_REMOTE_ROOT");

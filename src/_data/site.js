@@ -1,4 +1,5 @@
 import { resolveSeason } from "../lib/season.js";
+import { normalizeSiteOrigin } from "../lib/urls.js";
 
 /**
  * Site facts. Templates read these keys; they do not invent missing ones.
@@ -26,7 +27,7 @@ const site = {
   contactShort: "Chris",
   areaServed: "North Texas",
   season: resolveSeason(process.env.SEASON, configuredSeason),
-  url: process.env.SITE_URL || "",
+  url: normalizeSiteOrigin(process.env.SITE_URL || ""),
 };
 
 export default site;

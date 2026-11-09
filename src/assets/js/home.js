@@ -1,3 +1,5 @@
+import { SEND_FAILURE, estimateOutcome, validateEstimate } from "./estimate-outcome.js";
+
 const desktop = window.matchMedia("(min-width: 900px)");
 const headerTones = {
   dark: {
@@ -180,14 +182,25 @@ function setFieldError(field, message) {
   if (alert) alert.textContent = message || "";
 }
 
-function validate(data) {
-  const errors = {};
-  if (!String(data.get("name") || "").trim()) errors.name = "Please enter your name.";
-  if (!/^[\d\s().+-]{10,}$/.test(String(data.get("phone") || ""))) errors.phone = "Enter a valid phone number.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.get("email") || ""))) errors.email = "Enter a valid email address.";
-  if (!data.get("service")) errors.service = "Choose a service.";
-  if (!String(data.get("address") || "").trim()) errors.address = "Enter an address or ZIP code.";
-  return errors;
+function setFormStatus(message) {
+  if (!form) return;
+  let status = form.querySelector("[data-form-status]");
+  if (!message) {
+    status?.remove();
+    return;
+  }
+  if (!status) {
+    status = document.createElement("p");
+    status.dataset.formStatus = "";
+    status.setAttribute("role", "alert");
+    status.style.margin = "0";
+    status.style.fontSize = "12.5px";
+    status.style.lineHeight = "1.5";
+    status.style.textAlign = "center";
+    status.style.color = "#B4533A";
+    form.append(status);
+  }
+  status.textContent = message;
 }
 
 function showSuccess() {
@@ -201,7 +214,8 @@ function resetForm() {
   for (const field of ["name", "phone", "email", "service", "address"]) setFieldError(field, "");
   successPanel?.setAttribute("hidden", "");
   formPanel?.removeAttribute("hidden");
-  form?.querySelector("input, select, textarea")?.focus();
+  setFormStatus("");
+  form?.querySelector("#f-name")?.focus();
 }
 
 document.addEventListener("click", (event) => {
@@ -219,16 +233,39 @@ document.addEventListener("click", (event) => {
   if (action === "reset-form") resetForm();
 });
 
-form?.addEventListener("submit", (event) => {
+form?.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!form || form.dataset.sending === "true") return;
   const data = new FormData(form);
-  const errors = validate(data);
+  const errors = validateEstimate(data);
   for (const field of ["name", "phone", "email", "service", "address"]) setFieldError(field, errors[field] || "");
+  setFormStatus("");
   if (Object.keys(errors).length) {
     form.elements[Object.keys(errors)[0]]?.focus();
     return;
   }
-  showSuccess();
+  const button = form.querySelector('[type="submit"]');
+  form.dataset.sending = "true";
+  if (button) button.disabled = true;
+  try {
+    const response = await fetch(form.action, {
+      method: "POST",
+      body: data,
+      headers: { Accept: "application/json" },
+    });
+    const payload = await response.json().catch(() => null);
+    const outcome = estimateOutcome(response.status, payload);
+    if (outcome.ok) {
+      showSuccess();
+      return;
+    }
+    setFormStatus(outcome.message);
+  } catch {
+    setFormStatus(SEND_FAILURE);
+  } finally {
+    delete form.dataset.sending;
+    if (button) button.disabled = false;
+  }
 });
 
 document.addEventListener("keydown", (event) => {

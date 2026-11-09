@@ -12,15 +12,24 @@
 <meta property="og:description" content="{{ description }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ page.url | share }}">
+<meta property="og:site_name" content="{{ site.name }}">
+<meta property="og:locale" content="en_US">
+{% if heroImage %}
 <meta property="og:image" content="{{ heroImage | share }}">
+{% if heroAlt %}<meta property="og:image:alt" content="{{ heroAlt }}">{% endif %}
+<link rel="preload" as="image" href="{{ heroImage | url }}" fetchpriority="high">
+{% endif %}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ title }}">
 <meta name="twitter:description" content="{{ description }}">
+{% if heroImage %}
 <meta name="twitter:image" content="{{ heroImage | share }}">
+{% if heroAlt %}<meta name="twitter:image:alt" content="{{ heroAlt }}">{% endif %}
+{% endif %}
 {% include "build/chrome/font-links.njk" %}
 <link rel="stylesheet" href="{{ '/assets/css/site.css' | url }}">
 {% if schema == "LocalBusiness" %}
-<script type="application/ld+json">{{ site | jsonLd(page.url | share) | safe }}</script>
+<script type="application/ld+json">{{ site | jsonLd(page.url | share, heroImage | share, title, description, "/assets/img/green-garden-lawn-care-logo.jpg" | share) | safe }}</script>
 {% endif %}
 </head>
 <body data-season="{{ site.season }}">

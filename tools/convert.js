@@ -233,7 +233,10 @@ function rewriteTag(tag, state) {
   );
   tag = tag.replace(/aria-expanded="\{\{\s*menuOpen\s*\}\}"/g, 'aria-expanded="{{ menuExpanded | tf }}"');
   tag = tag.replace(/aria-pressed="\{\{\s*([^}]+)\s*\}\}"/g, 'aria-pressed="{{ $1 | tf }}"');
-  tag = tag.replace(/src="\{\{\s*(heroImage|g\.src|lbSrc)\s*\}\}"/g, 'src="{{ $1 | url }}"');
+  tag = tag.replace(/src="\{\{\s*(heroImage|g\.src|lbSrc)\s*\}\}"/g, (full, name) => {
+    const src = `src="{{ ${name} | url }}"`;
+    return name === "heroImage" ? `${src} fetchpriority="high"` : src;
+  });
   if (tag.includes("{{ headerInk }}")) tag = addToStartTag(tag, { className: "", hidden: false, extra: ["data-header-ink"] });
   if (tag.includes("{{ headerBg }}")) tag = addToStartTag(tag, { className: "", hidden: false, extra: ["data-header-bg"] });
   return tag;
