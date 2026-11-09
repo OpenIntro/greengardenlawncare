@@ -49,7 +49,7 @@ const SERVICES = [
   "Holiday Light Installation",
   "Lawn Maintenance",
   "Shrub & Hedge Trimming",
-  "Flower Bed Cleanout",
+  "Flower Bed Cleanouts",
   "Multiple Services",
 ];
 

@@ -23,6 +23,8 @@ const site = {
   email: null,
   hours: null,
   address: null,
+  googleBusinessProfile: null,
+  gtmId: "GTM-WCT6WQWC",
   contactName: "Chris Rivera",
   contactShort: "Chris",
   areaServed: "North Texas",

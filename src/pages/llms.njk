@@ -1,0 +1,22 @@
+# {{ site.name }}
+
+> Residential lawn maintenance, shrub and hedge trimming, flower bed cleanouts, and holiday light installation for homeowners in {{ site.areaServed }}.
+
+{{ site.name }} serves homeowners in {{ site.areaServed }}. This website does not publish a street address. The business does not have a Google Business Profile.
+
+## Services
+
+{% for service in services -%}
+- [{{ service.name | safe }}]({{ service.href | share }}): {{ service.description | safe }}
+{% endfor %}
+
+## Contact
+
+- Contact: {{ site.contactName }}
+- Phone: {{ site.phone }}
+- Area served: {{ site.areaServed }}
+- Website: {{ "/" | share }}
+
+## Pages
+
+- [Home]({{ "/" | share }}): Lawn care and holiday light installation in {{ site.areaServed }}

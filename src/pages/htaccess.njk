@@ -1,0 +1,10 @@
+---
+permalink: /.htaccess
+eleventyExcludeFromCollections: true
+layout: false
+---
+ErrorDocument 404 {{ "/404.html" | url }}
+
+<Files ".htaccess">
+  Require all denied
+</Files>

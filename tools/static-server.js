@@ -45,8 +45,7 @@ const server = http.createServer((req, res) => {
   }
   fs.readFile(file, (error, data) => {
     if (error) {
-      res.writeHead(404);
-      res.end("Not found");
+      sendMissing(res);
       return;
     }
     const type = types[path.extname(file)] || "application/octet-stream";
@@ -54,6 +53,23 @@ const server = http.createServer((req, res) => {
     res.end(data);
   });
 });
+
+function sendMissing(res) {
+  if (indexOnly) {
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Not found");
+    return;
+  }
+  fs.readFile(path.join(root, "404.html"), (error, data) => {
+    if (error) {
+      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Not found");
+      return;
+    }
+    res.writeHead(404, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    res.end(data);
+  });
+}
 
 server.listen(port, "127.0.0.1", () => {
   console.log(`Serving ${root} at http://127.0.0.1:${port}`);

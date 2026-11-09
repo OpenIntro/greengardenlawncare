@@ -24,8 +24,8 @@ export function heroFor(season, siteName) {
     };
   }
   return {
-    imageKey: "two-story-north-texas-home-outlined-in-multicolor-holiday-lights",
-    heroAlt: "Large two-story home with colorful holiday lights outlining its rooflines at night",
+    imageKey: "starry-night-two-story-home-with-multicolor-holiday-lights",
+    heroAlt: "Large two-story home with colorful holiday lights outlining its rooflines under a starry night sky",
     heroFocus: "70% 40%",
     heroEyebrow: "North Texas Lawn Care & Holiday Lighting",
     heroCopy: `From perfectly maintained lawns to beautifully illuminated holiday homes, ${siteName} helps your property look its best all year long.`,

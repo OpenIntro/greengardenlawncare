@@ -65,9 +65,10 @@ test("the design bundle is one homepage of jpeg assets", () => {
   const bundle = unpack(html);
   assert.deepEqual(bundle.views, ["home"]);
   assert.equal(bundle.format, "x-dc");
-  assert.equal(bundle.assets.length, 8);
+  assert.equal(bundle.assets.length, 9);
   assert.ok(bundle.assets.every((asset) => asset.mime === "image/jpeg"));
   assert.ok(bundle.assets.some((asset) => asset.key === "green-garden-lawn-care-logo"));
+  assert.ok(bundle.assets.some((asset) => asset.key === "starry-night-two-story-home-with-multicolor-holiday-lights"));
   assert.ok(bundle.assets.some((asset) => asset.key === "neatly-edged-corner-lot-lawn-after-mowing"));
   assert.equal(bundle.template.includes("Beautiful Homes."), true);
 });

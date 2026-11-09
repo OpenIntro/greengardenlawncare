@@ -47,5 +47,11 @@ export default {
     "mime": "image/jpeg",
     "alt": "Neatly edged corner lot lawn after mowing",
     "bytes": 254902
+  },
+  "starry-night-two-story-home-with-multicolor-holiday-lights": {
+    "src": "/assets/img/starry-night-two-story-home-with-multicolor-holiday-lights.jpg",
+    "mime": "image/jpeg",
+    "alt": "Starry night two-story home with multicolor holiday lights",
+    "bytes": 210055
   }
 };

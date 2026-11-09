@@ -1,5 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { blockTags } from "./block-tags.js";
+
+blockTags();
 
 test("home has no axe violations", async ({ page }) => {
   await page.goto("http://127.0.0.1:4173/");

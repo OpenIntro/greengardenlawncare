@@ -22,6 +22,8 @@ test("site facts keep the design phone and leave unknown facts empty", () => {
   assert.equal(site.email, null);
   assert.equal(site.hours, null);
   assert.equal(site.address, null);
+  assert.equal(site.googleBusinessProfile, null);
+  assert.equal(site.gtmId, "GTM-WCT6WQWC");
   const source = fs.readFileSync(new URL("../src/_data/site.js", import.meta.url), "utf8");
   const configuredSeason = source.match(/const configuredSeason = "(holiday|standard)"/)[1];
   assert.equal(site.season, resolveSeason(process.env.SEASON, configuredSeason));
@@ -47,7 +49,8 @@ test("gallery spans match the desktop design", () => {
 
 test("homepage data uses the season image and does not invent contact facts", () => {
   const assets = {
-    "two-story-north-texas-home-outlined-in-multicolor-holiday-lights": { src: "/assets/img/holiday.jpg" },
+    "starry-night-two-story-home-with-multicolor-holiday-lights": { src: "/assets/img/holiday.jpg" },
+    "two-story-north-texas-home-outlined-in-multicolor-holiday-lights": { src: "/assets/img/gallery-holiday.jpg" },
     "freshly-mowed-lawn-with-clean-edges-in-front-of-a-brick-home": { src: "/assets/img/lawn.jpg" },
     "warm-white-holiday-lights-installed-along-a-homes-roofline": { src: "/a.jpg" },
     "neatly-rounded-shrubs-in-a-mulched-bed-beside-a-front-porch": { src: "/b.jpg" },
@@ -60,6 +63,16 @@ test("homepage data uses the season image and does not invent contact facts", ()
   assert.equal(holiday.heroImage, "/assets/img/holiday.jpg");
   assert.equal(standard.heroImage, "/assets/img/lawn.jpg");
   assert.equal(holiday.galleryItems.length, 7);
+  assert.deepEqual(holiday.services, [
+    "Holiday Light Installation",
+    "Lawn Maintenance",
+    "Shrub & Hedge Trimming",
+    "Flower Bed Cleanouts",
+    "Multiple Services",
+  ]);
+  const design = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+  assert.match(design, /'Flower Bed Cleanouts'/);
+  assert.doesNotMatch(design, /'Flower Bed Cleanout'/);
   assert.equal(holiday.galleryItems[0].col, "1 / span 4");
 });
 

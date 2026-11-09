@@ -3,6 +3,9 @@ import path from "node:path";
 import { test, expect } from "@playwright/test";
 import pixelmatch from "pixelmatch";
 import { PNG } from "pngjs";
+import { blockTags } from "./block-tags.js";
+
+blockTags();
 
 const MAX_DIFF_RATIO = 0.001;
 /** Per-view caps. Leave empty unless a view has an approved pending-content treatment. */
