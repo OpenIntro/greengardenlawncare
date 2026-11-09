@@ -27,6 +27,10 @@ test("published javascript is one minified module", () => {
   const { js } = bundleJs({ root });
   assert.doesNotMatch(js, /estimate-outcome/);
   assert.match(js, /Please enter your name/);
-  assert.ok(js.length < fs.readFileSync(path.join(root, "src", "assets", "js", "home.js"), "utf8").length);
+  const sourceLength = ["home.js", "hero-lights.js", "estimate-outcome.js"].reduce(
+    (total, file) => total + fs.readFileSync(path.join(root, "src", "assets", "js", file), "utf8").length,
+    0,
+  );
+  assert.ok(js.length < sourceLength);
   assert.equal(fs.existsSync(path.join(root, "_site", "assets", "js", "estimate-outcome.js")), false);
 });
